@@ -51,7 +51,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -79,7 +79,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -103,7 +103,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
             done
     fi
@@ -140,7 +140,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
     done
 
@@ -219,7 +219,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -243,7 +243,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
     done 
     fi
@@ -259,7 +259,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
             done
     fi
@@ -351,7 +351,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -383,7 +383,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -411,7 +411,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
             done
     fi
@@ -456,7 +456,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
     done
 
@@ -546,7 +546,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
     environment:
     mcrConfig:
       debug: true
@@ -574,7 +574,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
     done 
     fi
@@ -594,7 +594,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /terraTrain/key-pair
+      keyPath: /Users/nvzh/.ssh/id_rsa
 EOL
             done
     fi
