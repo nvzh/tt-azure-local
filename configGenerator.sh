@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Sourcing config
-. /terraTrain/config
+. /Users/nvzh/Dropbox/github/nvzh/tt-azure-local/config.tfvars
 
 aws_config() {
 if [[ $os_name == "ubuntu" ]] 
@@ -660,5 +660,5 @@ elif [[ $cloud_provider == "azure" ]]
 then
   azure_config
 else
-  echo "Wrong provider. Please edit the 'provider' value in the /terraTrain/config file"
+  echo "Wrong provider. Please edit the 'provider' value in the config.tfvars file"
 fi
