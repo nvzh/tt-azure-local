@@ -3,7 +3,7 @@ resource "azurerm_public_ip" "emea-cso-manager-pub-ip" {
   count               = var.manager_count
   location            = var.location
   resource_group_name = var.rg
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "emea-cso-manager-interface" {
@@ -13,10 +13,12 @@ resource "azurerm_network_interface" "emea-cso-manager-interface" {
   resource_group_name = var.rg
 
   ip_configuration {
-    name                          = "emea-cso-ip-configuration"
+    #name                          = "emea-cso-ip-configuration"
+    name                          = format("%s-master-Net-%s", var.name, count.index + 1)
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = element(azurerm_public_ip.emea-cso-manager-pub-ip.*.id, count.index)
+    primary                       = true
   }
 }
 
@@ -31,6 +33,9 @@ resource "azurerm_virtual_machine" "emea-cso-manager-vm" {
   resource_group_name   = var.rg
   network_interface_ids = [element(azurerm_network_interface.emea-cso-manager-interface.*.id, count.index)]
   vm_size               = var.manager_instance_type
+
+  ### Uncomment that line if you're going to use LB
+  #availability_set_id = azurerm_availability_set.emea_cso_manager_avset.id
 
   # this is a demo instance, so we can delete all data on termination
   delete_os_disk_on_termination    = true
