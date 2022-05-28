@@ -51,7 +51,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
     environment:
     mcrConfig:
       debug: true
@@ -79,7 +79,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
     environment:
     mcrConfig:
       debug: true
@@ -103,7 +103,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
 EOL
             done
     fi
@@ -140,7 +140,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
 EOL
     done
 
@@ -219,7 +219,7 @@ EOL
       address: $mgr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
     environment:
     mcrConfig:
       debug: true
@@ -243,7 +243,7 @@ EOL
       address: $msr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
 EOL
     done 
     fi
@@ -259,7 +259,7 @@ EOL
       address: $wkr_address
       user: $amiUserName
       port: 22
-      keyPath: /Users/nvzh/.ssh/id_rsa
+      keyPath: /terraTrain/key-pair
 EOL
             done
     fi
@@ -336,7 +336,7 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 mgr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-managerVM-"$index"  \
+                --name "$name"-case"$caseNo"-manager-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
                 cat >> launchpad.yaml << EOL
@@ -368,7 +368,7 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 mgr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-managerVM-"$index"  \
+                --name "$name"-case"$caseNo"-manager-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
                 cat >> launchpad.yaml << EOL
@@ -402,7 +402,7 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 wkr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-workerVM-"$index"  \
+                --name "$name"-case"$caseNo"-worker-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
                 cat >> launchpad.yaml << EOL
@@ -423,10 +423,10 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 win_worker_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-winVM-"$index"  \
+                --name "$name"-case"$caseNo"-win-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
-                mkeadminPassword=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
+                mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
                 cat >> launchpad.yaml << EOL
   - role: worker
     winRM:
@@ -447,7 +447,7 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 msr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msrVM-"$index"  \
+                --name "$name"-case"$caseNo"-msr-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
                 cat >> launchpad.yaml << EOL
@@ -477,7 +477,7 @@ EOL
     ####### Generating MSR Configuration
     msr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msrVM-0  \
+                --name "$name"-case"$caseNo"-msr-0  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
     if [[ $nfs_backend == 0 ]] ; then
@@ -491,7 +491,11 @@ EOL
     replicaIDs: sequential
 EOL
     else
-      nfs_address=$(cat ./terraform.tfstate |  jq -r '.resources[] | select(.name=="nfsVM") | .instances[] | select(.index_key==0) | .attributes.public_dns')
+      nfs_address=$(az vm list-ip-addresses \
+                --resource-group "$RG" \
+                --name "$name"-case"$caseNo"-nfs  \
+                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                --output tsv)
       cat >> launchpad.yaml << EOL
   msr:
     version: $msr_version
@@ -531,7 +535,7 @@ EOL
             index=`expr $count - 1` #because index_key starts with 0
             mgr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-managerVM-"$index"  \
+                --name "$name"-case"$caseNo"-manager-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
             cat >> launchpad.yaml << EOL
@@ -565,7 +569,7 @@ EOL
           index=`expr $count - 1` #because index_key starts with 0
           msr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msrVM-"$index"  \
+                --name "$name"-case"$caseNo"-msr-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
           cat >> launchpad.yaml << EOL
@@ -585,7 +589,7 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 wkr_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-workerVM-"$index"  \
+                --name "$name"-case"$caseNo"-worker-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
                 cat >> launchpad.yaml << EOL
@@ -606,10 +610,10 @@ EOL
                 index=`expr $count - 1` #because index_key starts with 0
                 win_worker_address=$(az vm list-ip-addresses \
                 --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-winVM-"$index"  \
+                --name "$name"-case"$caseNo"-win-"$index"  \
                 --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
                 --output tsv)
-                mkeadminPassword=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
+                mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
                 cat >> launchpad.yaml << EOL
   - role: worker
     winRM:
@@ -653,12 +657,10 @@ fi
 }
 
 
-if [[ $cloud_provider == "aws" ]] 
-then
+if [[ "$cloud_provider" == "aws" ]]; then
   aws_config
-elif [[ $cloud_provider == "azure" ]] 
-then
+elif [[ "$cloud_provider" == "azure" ]]; then
   azure_config
 else
-  echo "Wrong provider. Please edit the 'provider' value in the config.tfvars file"
+  echo "Wrong provider. Please edit the 'provider' value in the /terraTrain/config file"
 fi

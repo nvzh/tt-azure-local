@@ -1,43 +1,55 @@
-resource "azurerm_public_ip" "emea-cso-msr-pub-ip" {
+resource "azurerm_public_ip" "cso_msr_pub_ip" {
   name                = "${var.name}-case${var.caseNo}-msr-instance-public-ip-${count.index}"
   count               = var.msr_count
   location            = var.location
   resource_group_name = var.rg
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+
+  tags = {
+    Name          = format("%s-msr-pubip-%s", var.name, count.index + 1)
+    resourceOwner = "${var.name}"
+    caseNumber    = "${var.caseNo}"
+    resourceType  = "publicIP"
+  }
 }
 
-resource "azurerm_network_interface" "emea-cso-msr-interface" {
+resource "azurerm_network_interface" "cso_msr_interface" {
   name                = "${var.name}-case${var.caseNo}-msr-net-interface-${count.index}"
   count               = var.msr_count
   location            = var.location
   resource_group_name = var.rg
 
   ip_configuration {
-    name                          = "emea-cso-ip-configuration"
+    name                          = "cso-ip-configuration"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = element(azurerm_public_ip.emea-cso-msr-pub-ip.*.id, count.index)
+    public_ip_address_id          = element(azurerm_public_ip.cso_msr_pub_ip.*.id, count.index)
+  }
+
+  tags = {
+    Name          = format("%s-msr-int-%s", var.name, count.index + 1)
+    resourceOwner = "${var.name}"
+    caseNumber    = "${var.caseNo}"
+    resourceType  = "networkInterface"
   }
 }
 
-resource "azurerm_network_interface_security_group_association" "emea-cso-msr-allow-ssh" {
-  count                     = length(azurerm_network_interface.emea-cso-msr-interface)
-  network_interface_id      = azurerm_network_interface.emea-cso-msr-interface[count.index].id
+resource "azurerm_network_interface_security_group_association" "cso_msr_allow_ssh" {
+  count                     = length(azurerm_network_interface.cso_msr_interface)
+  network_interface_id      = azurerm_network_interface.cso_msr_interface[count.index].id
   network_security_group_id = var.security_group_id
 }
 
-########################
-########################
-########################
+### MSR INSTANCE ###
 
-resource "azurerm_virtual_machine" "emea-cso-msr-vm" {
-    depends_on = [azurerm_network_interface_security_group_association.emea-cso-msr-allow-ssh]
+resource "azurerm_virtual_machine" "cso_msr_vm" {
+  depends_on = [azurerm_network_interface_security_group_association.cso_msr_allow_ssh]
 
-  name                  = "${var.name}-case${var.caseNo}-msrvm-${count.index}"
+  name                  = "${var.name}-case${var.caseNo}-msr-${count.index}"
   count                 = var.msr_count
   location              = var.location
   resource_group_name   = var.rg
-  network_interface_ids = [element(azurerm_network_interface.emea-cso-msr-interface.*.id, count.index)]
+  network_interface_ids = [element(azurerm_network_interface.cso_msr_interface.*.id, count.index)]
   vm_size               = var.msr_instance_type
 
   # this is a demo instance, so we can delete all data on termination
@@ -54,19 +66,18 @@ resource "azurerm_virtual_machine" "emea-cso-msr-vm" {
     version   = "latest"
   }
   storage_os_disk {
-    name              = "emea-cso-msr-osdisk-${count.index}"
+    name              = "cso-msr-osdisk-${count.index}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
   os_profile {
-    computer_name  = "emea-cso-msrvm-${count.index}"
+    computer_name  = "cso-msr-${count.index}"
     admin_username = "azureuser"
     custom_data    = <<-EOF
-#cloud-config
-bootcmd:
- - >
-   sudo systemctl stop firewalld && sudo systemctl disable firewalld
+#!/bin/bash
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
+yum install -y nfs-utils || apt install -y nfs-common || zypper -n in nfs-client -y
 EOF
   }
   os_profile_linux_config {
@@ -75,5 +86,13 @@ EOF
       key_data = file("/Users/nvzh/.ssh/id_rsa.pub")
       path     = "/home/azureuser/.ssh/authorized_keys"
     }
+  }
+
+  tags = {
+    Name          = format("%s-msr-vm-%s", var.name, count.index + 1)
+    resourceOwner = "${var.name}"
+    caseNumber    = "${var.caseNo}"
+    resourceType  = "instance"
+    role          = "msr"
   }
 }

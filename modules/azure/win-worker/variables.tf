@@ -16,11 +16,6 @@ variable "rg" {}
 
 variable "subnet_id" {}
 
-# testing separate subnet
-#variable "subnet_win_id" {}
-
 variable "security_group_id" {}
-
-#variable "username" {}
 
 variable "password" {}

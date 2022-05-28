@@ -100,3 +100,14 @@ module "win-worker" {
   security_group_id     = module.vnet.security_group_id
   password          = module.common.password
 }
+
+module "nfs-node" {
+  source                = "./nfs-node"
+  caseNo                = var.caseNo
+  nfs_backend           = var.nfs_backend
+  name                  = var.name
+  location              = var.region
+  rg                    = module.vnet.rg
+  subnet_id             = module.vnet.subnet_id
+  security_group_id     = module.vnet.security_group_id
+}
