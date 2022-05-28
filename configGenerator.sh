@@ -462,8 +462,8 @@ EOL
 
     ####### Generating MKE Configuration
     ### !!! NEED TO GET RID OF --force-minimums FLAG !!! ###
-    mkeadminUsername=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
-    mkeadminPassword=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
+    mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
+    mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
     cat >> launchpad.yaml << EOL
   mke:
     version: $mke_version
@@ -628,8 +628,8 @@ EOL
             done
     fi
     ####### Generating MKE Configuration
-    mkeadminUsername=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
-    mkeadminPassword=$(cat ./terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
+    mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
+    mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
     cat >> launchpad.yaml << EOL
   mke:
     version: $mke_version
