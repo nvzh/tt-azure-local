@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Sourcing config
-. /Users/nvzh/Dropbox/github/nvzh/tt-azure-local/config.tfvars
+. ../../config.tfvars
 
 aws_config() {
 if [[ $os_name == "ubuntu" ]] 
