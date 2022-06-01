@@ -1,6 +1,6 @@
 terraform {
   backend "local" {
-    path = "/Users/nvzh/Dropbox/github/nvzh/tt-azure-local/terraform.tfstate"
+    path = "../../terraform.tfstate"
   }
   required_providers {
     azurerm = {
@@ -13,7 +13,7 @@ terraform {
     }
   }
 
-  required_version = "~> 1.1.6"
+  required_version = "~> 1.2.1"
 }
 
 provider "azurerm" {
