@@ -12,6 +12,11 @@ resource "random_string" "mke_password" {
 }
 
 # Storage account for MSR 3.x.x
+resource "azurerm_storage_container" "cso_sa_cont" {
+  name                  = "case${var.caseNo}sa-cont"
+  storage_account_name  = azurerm_storage_account.cso_sa.name
+  container_access_type = "container"
+}
 resource "azurerm_storage_account" "cso_sa" {
   name                      = "case${var.caseNo}sa"
   resource_group_name       = var.rg

@@ -105,3 +105,13 @@ variable "nfs_backend" {
   type        = string
   default = "0"
 }
+
+variable "cloud_provider" {
+  type        = string
+  description = "Please type your desired cloud"
+}
+
+variable "publicKey" {
+  type        = string
+  description = "Please use key"
+}

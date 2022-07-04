@@ -3,7 +3,8 @@ resource "azurerm_public_ip" "cso_win_pub_ip" {
   count               = var.win_worker_count
   location            = var.location
   resource_group_name = var.rg
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  domain_name_label   = "${var.name}-case${var.caseNo}-win-${count.index}"
 
   tags = {
     Name          = format("%s-win-pubip-%s", var.name, count.index + 1)
@@ -73,18 +74,21 @@ resource "azurerm_virtual_machine" "cso_win_vm" {
     custom_data    = <<EOF
 # Set Administrator password
 ([adsi]("WinNT://./administrator, user")).SetPassword("${var.password}")
+
 # Snippet to enable WinRM over HTTPS with a self-signed certificate
 # from https://gist.github.com/TechIsCool/d65017b8427cfa49d579a6d7b6e03c93
 Write-Output "Disabling WinRM over HTTP..."
 Disable-NetFirewallRule -Name "WINRM-HTTP-In-TCP"
 Disable-NetFirewallRule -Name "WINRM-HTTP-In-TCP-PUBLIC"
 Get-ChildItem WSMan:\Localhost\listener | Remove-Item -Recurse
+
 Write-Output "Configuring WinRM for HTTPS..."
 Set-Item -Path WSMan:\LocalHost\MaxTimeoutms -Value '1800000'
 Set-Item -Path WSMan:\LocalHost\Shell\MaxMemoryPerShellMB -Value '1024'
 Set-Item -Path WSMan:\LocalHost\Service\AllowUnencrypted -Value 'false'
 Set-Item -Path WSMan:\LocalHost\Service\Auth\Basic -Value 'true'
 Set-Item -Path WSMan:\LocalHost\Service\Auth\CredSSP -Value 'true'
+
 New-NetFirewallRule -Name "WINRM-HTTPS-In-TCP" `
     -DisplayName "Windows Remote Management (HTTPS-In)" `
     -Description "Inbound rule for Windows Remote Management via WS-Management. [TCP 5986]" `
@@ -94,6 +98,7 @@ New-NetFirewallRule -Name "WINRM-HTTPS-In-TCP" `
     -LocalPort "5986" `
     -Action Allow `
     -Profile Domain,Private
+
 New-NetFirewallRule -Name "WINRM-HTTPS-In-TCP-PUBLIC" `
     -DisplayName "Windows Remote Management (HTTPS-In)" `
     -Description "Inbound rule for Windows Remote Management via WS-Management. [TCP 5986]" `
@@ -103,15 +108,23 @@ New-NetFirewallRule -Name "WINRM-HTTPS-In-TCP-PUBLIC" `
     -LocalPort "5986" `
     -Action Allow `
     -Profile Public
+
 $Hostname = [System.Net.Dns]::GetHostByName((hostname)).HostName.ToUpper()
 $pfx = New-SelfSignedCertificate -CertstoreLocation Cert:\LocalMachine\My -DnsName $Hostname
 $certThumbprint = $pfx.Thumbprint
 $certSubjectName = $pfx.SubjectName.Name.TrimStart("CN = ").Trim()
+
 New-Item -Path WSMan:\LocalHost\Listener -Address * -Transport HTTPS -Hostname $certSubjectName -CertificateThumbPrint $certThumbprint -Port "5986" -force
+
 Write-Output "Restarting WinRM Service..."
 Stop-Service WinRM
 Set-Service WinRM -StartupType "Automatic"
 Start-Service WinRM
+Invoke-WebRequest -Uri https://get.mirantis.com/install.ps1 -o c:/install.ps1
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force -Scope Process;
+c:/install.ps1
+Start-Sleep -s 5
+Restart-Computer
 EOF
   }
 

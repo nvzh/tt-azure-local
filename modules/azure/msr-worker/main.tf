@@ -4,6 +4,7 @@ resource "azurerm_public_ip" "cso_msr_pub_ip" {
   location            = var.location
   resource_group_name = var.rg
   allocation_method   = "Static"
+  domain_name_label   = "${var.name}-case${var.caseNo}-msr-${count.index}"
 
   tags = {
     Name          = format("%s-msr-pubip-%s", var.name, count.index + 1)
@@ -83,7 +84,7 @@ EOF
   os_profile_linux_config {
     disable_password_authentication = true
     ssh_keys {
-      key_data = file("/Users/nvzh/.ssh/id_rsa.pub")
+      key_data = file("/terraTrain/key-pair.pub")
       path     = "/home/azureuser/.ssh/authorized_keys"
     }
   }

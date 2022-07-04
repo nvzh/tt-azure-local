@@ -4,6 +4,7 @@ resource "azurerm_public_ip" "cso_nfs_pub_ip" {
   location            = var.location
   resource_group_name = var.rg
   allocation_method   = "Static"
+  domain_name_label   = "${var.name}-case${var.caseNo}-nfs"
 
   tags = {
     Name          = format("%s-nfs-pubip-%s", var.name, count.index + 1)
@@ -67,6 +68,7 @@ resource "azurerm_virtual_machine" "cso_nfs_vm" {
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
+    disk_size_gb      = 100
   }
   os_profile {
     computer_name  = "cso-nfs"
@@ -86,7 +88,7 @@ EOF
   os_profile_linux_config {
     disable_password_authentication = true
     ssh_keys {
-      key_data = file("/Users/nvzh/.ssh/id_rsa.pub")
+      key_data = file("/terraTrain/key-pair.pub")
       path     = "/home/azureuser/.ssh/authorized_keys"
     }
   }
