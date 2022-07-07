@@ -111,7 +111,7 @@ variable "cloud_provider" {
   description = "Please type your desired cloud"
 }
 
-variable "publicKey" {
-  type        = string
-  description = "Please use key"
-}
+# variable "publicKey" {
+#   type        = string
+#   description = "Please use key"
+# }

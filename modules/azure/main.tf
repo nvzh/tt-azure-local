@@ -1,6 +1,6 @@
 terraform {
   backend "local" {
-    path = "/terraTrain/terraform.tfstate"
+    path = "../../terraform.tfstate"
   }
   required_providers {
     azurerm = {

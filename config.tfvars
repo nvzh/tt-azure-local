@@ -7,7 +7,7 @@ cloud_provider="azure"
 # azure: germanywestcentral, uksouth, etc.
 # aws: eu-central-1, ap-southeast-1, us-east-1, etc.
 region="germanywestcentral"             
-caseNo="cka"                    # optional tag to identify resources
+caseNo="6"                    # optional tag to identify resources
 
 # Platform Info
 #|-------------------------------------------------------------------------------------------|
@@ -26,16 +26,16 @@ caseNo="cka"                    # optional tag to identify resources
 os_name="0001-com-ubuntu-server-focal"                   
 os_version="20_04-lts-gen2"
 
-mcr_version="20.10.7"              # Please use specific minor engine version.
+mcr_version="20.10.10"              # Please use specific minor engine version.
 
 # MKE Info
-manager_count="3"                  # Number of Managers
-mke_version="3.5.3"                # MKE Version
+manager_count="1"                  # Number of Managers
+mke_version="3.5.4"                # MKE Version
 
 # MSR Info
-msr_count="0"                      # Number of MSR replicas
+msr_count="3"                      # Number of MSR replicas
 msr_version="2.9.5"                # For MSR Classic: 2.8.8, 2.9.7 etc. For MSRv3 choose the helm chart version 1.0.0,1.0.1 etc.
-nfs_backend="0"                    # "1" for true and "0" for false, BUT: always put "1" for MSRv3, because we must have NFS for MSR3
+nfs_backend="1"                    # "1" for true and "0" for false, BUT: always put "1" for MSRv3, because we must have NFS for MSR3
 msr_version_3="0"                  # Put 1 for MSR version 3
 
 # Worker Info

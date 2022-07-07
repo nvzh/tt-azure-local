@@ -84,7 +84,7 @@ EOF
   os_profile_linux_config {
     disable_password_authentication = true
     ssh_keys {
-      key_data = file("/terraTrain/key-pair.pub")
+      key_data = file("/Users/nvzh/.ssh/id_rsa.pub")
       path     = "/home/azureuser/.ssh/authorized_keys"
     }
   }

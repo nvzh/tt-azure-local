@@ -334,11 +334,12 @@ EOL
         for count in $(seq $manager_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                mgr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-manager-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # mgr_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-manager-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                mgr_address="$name-case$caseNo-manager-$index.$region.cloudapp.azure.com"
                 cat >> launchpad.yaml << EOL
   - role: manager
     hooks:
@@ -366,11 +367,12 @@ EOL
       for count in $(seq $manager_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                mgr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-manager-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # mgr_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-manager-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                mgr_address="$name-case$caseNo-manager-$index.$region.cloudapp.azure.com"
                 cat >> launchpad.yaml << EOL
   - role: manager
     hooks:
@@ -400,11 +402,12 @@ EOL
             for count in $(seq $worker_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                wkr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-worker-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # wkr_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-worker-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                wkr_address="$name-case$caseNo-worker-$index.$region.cloudapp.azure.com"
                 cat >> launchpad.yaml << EOL
   - role: worker
     ssh:
@@ -421,11 +424,12 @@ EOL
             for count in $(seq $win_worker_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                win_worker_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-win-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # win_worker_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-win-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                win_worker_address="$name-case$caseNo-win-$index.$region.cloudapp.azure.com"
                 mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
                 cat >> launchpad.yaml << EOL
   - role: worker
@@ -445,11 +449,12 @@ EOL
     for count in $(seq $msr_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                msr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msr-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # msr_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-msr-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                msr_address="$name-case$caseNo-msr-$index.$region.cloudapp.azure.com"
                 cat >> launchpad.yaml << EOL
   - role: msr
     ssh:
@@ -462,8 +467,12 @@ EOL
 
     ####### Generating MKE Configuration
     ### !!! NEED TO GET RID OF --force-minimums FLAG !!! ###
+    # mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
+    # mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
     mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
     mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
+    mkeurldns=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="cso_manager_pub_ip") | .instances[] | select(.index_key==0) | .attributes.fqdn')
+    mkeurlip=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="cso_manager_pub_ip") | .instances[] | select(.index_key==0) | .attributes.ip_address')
     cat >> launchpad.yaml << EOL
   mke:
     version: $mke_version
@@ -472,14 +481,18 @@ EOL
     adminPassword: $mkeadminPassword
     installFlags:
     - --force-minimums
+    - --san $mkeurldns
+    - --san $mkeurlip
+    - --default-node-orchestrator=kubernetes
 EOL
 
     ####### Generating MSR Configuration
-    msr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msr-0  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+    # msr_address=$(az vm list-ip-addresses \
+    #             --resource-group "$RG" \
+    #             --name "$name"-case"$caseNo"-msr-0  \
+    #             --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+    #             --output tsv)
+    msr_address=$(cat ../../terraform.tfstate |  jq -r '.resources[] | select(.name=="cso_msr_pub_ip") | .instances[] | select(.index_key==0) | .attributes.fqdn')
     if [[ $nfs_backend == 0 ]] ; then
       cat >> launchpad.yaml << EOL
   msr:
@@ -488,14 +501,16 @@ EOL
     installFlags:
     - --dtr-external-url $msr_address
     - --ucp-insecure-tls
+    - --ucp-node cso-msr-0
     replicaIDs: sequential
 EOL
     else
-      nfs_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-nfs  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+      # nfs_address=$(az vm list-ip-addresses \
+      #           --resource-group "$RG" \
+      #           --name "$name"-case"$caseNo"-nfs  \
+      #           --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+      #           --output tsv)
+      nfs_address="$name-case$caseNo-nfs.$region.cloudapp.azure.com"
       cat >> launchpad.yaml << EOL
   msr:
     version: $msr_version
@@ -503,6 +518,7 @@ EOL
     installFlags:
     - --dtr-external-url $msr_address
     - --ucp-insecure-tls
+    - --ucp-node cso-msr-0
     - --nfs-storage-url nfs://$nfs_address/var/nfs/general
     replicaIDs: sequential
 EOL
@@ -533,11 +549,12 @@ EOL
     for count in $(seq $manager_count)
         do 
             index=`expr $count - 1` #because index_key starts with 0
-            mgr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-manager-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+            # mgr_address=$(az vm list-ip-addresses \
+            #     --resource-group "$RG" \
+            #     --name "$name"-case"$caseNo"-manager-"$index"  \
+            #     --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+            #     --output tsv)
+            mgr_address="$name-case$caseNo-manager-$index.$region.cloudapp.azure.com"
             cat >> launchpad.yaml << EOL
   - role: manager
     hooks:
@@ -567,11 +584,12 @@ EOL
     for count in $(seq $msr_count)
       do 
           index=`expr $count - 1` #because index_key starts with 0
-          msr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-msr-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+          # msr_address=$(az vm list-ip-addresses \
+          #       --resource-group "$RG" \
+          #       --name "$name"-case"$caseNo"-msr-"$index"  \
+          #       --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+          #       --output tsv)
+          msr_address="$name-case$caseNo-msr-$index.$region.cloudapp.azure.com"
           cat >> launchpad.yaml << EOL
   - role: worker
     ssh:
@@ -587,11 +605,12 @@ EOL
             for count in $(seq $worker_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                wkr_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-worker-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # wkr_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-worker-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                wkr_address="$name-case$caseNo-worker-$index.$region.cloudapp.azure.com"
                 cat >> launchpad.yaml << EOL
   - role: worker
     ssh:
@@ -608,11 +627,12 @@ EOL
             for count in $(seq $win_worker_count)
             do 
                 index=`expr $count - 1` #because index_key starts with 0
-                win_worker_address=$(az vm list-ip-addresses \
-                --resource-group "$RG" \
-                --name "$name"-case"$caseNo"-win-"$index"  \
-                --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
-                --output tsv)
+                # win_worker_address=$(az vm list-ip-addresses \
+                # --resource-group "$RG" \
+                # --name "$name"-case"$caseNo"-win-"$index"  \
+                # --query "[].virtualMachine.network.publicIpAddresses[0].ipAddress" \
+                # --output tsv)
+                win_worker_address="$name-case$caseNo-win-$index.$region.cloudapp.azure.com"
                 mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)
                 cat >> launchpad.yaml << EOL
   - role: worker
@@ -628,8 +648,12 @@ EOL
             done
     fi
     ####### Generating MKE Configuration
+    # mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
+    # mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
     mkeadminUsername=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_username") | .instances[] | .attributes.id' 2>/dev/null)
     mkeadminPassword=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="mke_password") | .instances[] | .attributes.id' 2>/dev/null)                
+    mkeurldns=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="cso_manager_pub_ip") | .instances[] | select(.index_key==0) | .attributes.fqdn')
+    mkeurlip=$(cat ../../terraform.tfstate 2>/dev/null | jq -r '.resources[] | select(.name=="cso_manager_pub_ip") | .instances[] | select(.index_key==0) | .attributes.ip_address')
     cat >> launchpad.yaml << EOL
   mke:
     version: $mke_version
@@ -638,6 +662,9 @@ EOL
     adminPassword: $mkeadminPassword
     installFlags:
     - --force-minimums
+    - --san $mkeurldns
+    - --san $mkeurlip
+    - --default-node-orchestrator=kubernetes    
 EOL
 
     ####### Generating MCR Configuration
